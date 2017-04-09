@@ -220,7 +220,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         
         let borderWidth = dataSet.barBorderWidth
         let borderColor = dataSet.barBorderColor
-        let drawBorder = borderWidth > 0.0
         
         context.saveGState()
         
@@ -289,13 +288,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             }
         }
         
-        let isSingleColor = dataSet.colors.count == 1
-        
-        if isSingleColor
-        {
-            context.setFillColor(dataSet.color(atIndex: 0).cgColor)
-        }
-        
         for j in stride(from: 0, to: buffer.rects.count, by: 1)
         {
             let barRect = buffer.rects[j]
@@ -309,26 +301,36 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             {
                 break
             }
-            
-            if !isSingleColor
-            {
-                // Set the color for the currently drawn value. If the index is out of bounds, reuse colors.
-                context.setFillColor(dataSet.color(atIndex: j).cgColor)
-            }
-            
-            context.fill(barRect)
-            
-            if drawBorder
-            {
-                context.setStrokeColor(borderColor.cgColor)
-                context.setLineWidth(borderWidth)
-                context.stroke(barRect)
-            }
+
+            drawBar(context: context,
+                    barRect: barRect,
+                    color: dataSet.color(atIndex: j).cgColor,
+                    borderColor: borderColor.cgColor,
+                    borderWidth: borderWidth)
+
         }
         
         context.restoreGState()
     }
-    
+
+    open func drawBar(
+        context: CGContext,
+        barRect: CGRect,
+        color: CGColor,
+        borderColor: CGColor,
+        borderWidth: CGFloat)
+    {
+        context.setFillColor(color)
+
+        context.fill(barRect)
+
+        if borderWidth > 0.0 {
+            context.setStrokeColor(borderColor)
+            context.setLineWidth(borderWidth)
+            context.stroke(barRect)
+        }
+    }
+
     open func prepareBarHighlight(
         x: Double,
           y1: Double,
